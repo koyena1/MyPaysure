@@ -34,7 +34,9 @@
         }
         
         .hero {
-            background: linear-gradient(rgba(26, 58, 143, 0.8), rgba(0, 162, 232, 0.8)), url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            /* Kept the background image for the hero as it is a header, 
+               but you can remove the url() part if you want it purely blue */
+            background: linear-gradient(rgba(26, 58, 143, 0.9), rgba(0, 162, 232, 0.9)), url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
             background-size: cover;
             background-position: center;
             color: white;
@@ -121,21 +123,20 @@
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
+            /* Added border-top to make it pop without images */
+            border-top: 4px solid var(--secondary);
         }
         
         .card:hover {
             transform: translateY(-10px);
             box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            border-top: 4px solid var(--accent);
         }
         
-        .card-img {
-            height: 200px;
-            background-size: cover;
-            background-position: center;
-        }
+        /* Removed .card-img styles as they are no longer used */
         
         .card-content {
-            padding: 25px;
+            padding: 35px 25px; /* Increased padding slightly for text-only look */
         }
         
         .card h3 {
@@ -146,7 +147,28 @@
         
         .card p {
             color: #666;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+        }
+        
+        /* Added a specific style for lists inside cards if needed */
+        .card ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .card ul li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .card ul li::before {
+            content: "•";
+            color: var(--accent);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
         }
         
         .steps {
@@ -222,44 +244,53 @@ include 'includes/header.php';
 
     <section class="hero">
         <div class="container">
-            <h1>Smart Financial Opportunities</h1>
-            <p>Discover how PaySure can help you build a secure financial future with our innovative investment and insurance solutions.</p>
-            <a href="#opportunities" class="btn">Explore Opportunities</a>
+            <h1>Build Your Career</h1>
+            <p>Start with a Smart Insurance Plan and unlock sustainable income streams. A clean, transparent path to financial growth.</p>
+            <a href="#opportunities" class="btn">View Income Plans</a>
         </div>
     </section>
 
     <section class="section" id="opportunities">
         <div class="container">
             <div class="section-title">
-                <h2>Smart Earning Opportunities</h2>
-                <p>Join PaySure and unlock multiple income streams with our comprehensive distributor program</p>
+                <h2>Income Opportunities</h2>
+                <p>Simple, transparent ways to earn with PaySure.</p>
             </div>
             
             <div class="opportunity-cards">
                 <div class="card">
-                    <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
                     <div class="card-content">
-                        <h3>Distribution Guaranteed Benefit</h3>
-                        <p>Secure your financial future with monthly 6% earnings through our exclusive Bajaj Allianz insurance plans.</p>
-                        <a href="#" class="btn">Learn More</a>
+                        <h3>Retail Income</h3>
+                        <p>Earn direct profit from your personal sales.</p>
+                        <ul>
+                            <li>Instant earnings on every plan sold.</li>
+                            <li>Transparent commission structure.</li>
+                            <li>No cap on personal retail volume.</li>
+                        </ul>
                     </div>
                 </div>
                 
                 <div class="card">
-                    <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
                     <div class="card-content">
-                        <h3>Performance Bonus</h3>
-                        <p>Earn ₹2,000 for every matching business unit with our 1:1 performance bonus structure.</p>
-                        <a href="#" class="btn">Learn More</a>
+                        <h3>Referral Income</h3>
+                        <p>Build a career by expanding the network.</p>
+                        <ul>
+                            <li>Earn bonuses for introducing new distributors.</li>
+                            <li>Benefit from team growth and mentorship.</li>
+                            <li>Create a passive income stream.</li>
+                        </ul>
                     </div>
                 </div>
                 
                 <div class="card">
-                    <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
                     <div class="card-content">
-                        <h3>Club Member Benefits</h3>
-                        <p>Advance through our ranking system and unlock exclusive rewards, reimbursements, and international tours.</p>
-                        <a href="#" class="btn">Learn More</a>
+                        <h3>ROI (Return on Investment)</h3>
+                        <p>Secure returns on your own financial planning.</p>
+                        <ul>
+                            <li>Consistent returns on your insurance plan.</li>
+                            <li>Smart wealth accumulation over time.</li>
+                            <li>Financial security for your future.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -269,33 +300,33 @@ include 'includes/header.php';
     <section class="section" style="background-color: #f0f5ff;">
         <div class="container">
             <div class="section-title">
-                <h2>How to Become a Distributor</h2>
-                <p>Follow these simple steps to start your journey with PaySure</p>
+                <h2>How to Start Your Career</h2>
+                <p>Follow these simple steps to become a Distributor</p>
             </div>
             
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
-                    <h4>Fill Registration Form</h4>
-                    <p>Complete our online registration form with your details</p>
+                    <h4>Register</h4>
+                    <p>Fill out the online application form.</p>
                 </div>
                 
                 <div class="step">
                     <div class="step-number">2</div>
-                    <h4>Upload KYC Documents</h4>
-                    <p>Submit proper KYC documents for authentication</p>
+                    <h4>KYC</h4>
+                    <p>Upload documents for verification.</p>
                 </div>
                 
                 <div class="step">
                     <div class="step-number">3</div>
-                    <h4>Make Payment</h4>
-                    <p>Pay through our associate product purchase link</p>
+                    <h4>Activate</h4>
+                    <p>Purchase a plan to activate your ID.</p>
                 </div>
                 
                 <div class="step">
                     <div class="step-number">4</div>
-                    <h4>Get Activated</h4>
-                    <p>After validation, your distributor code will be activated</p>
+                    <h4>Earn</h4>
+                    <p>Start earning Retail, Referral & ROI income.</p>
                 </div>
             </div>
         </div>

@@ -215,87 +215,119 @@ include 'includes/header.php';
 
 <main class="flex-1">
     <!-- HERO SECTION -->
-    <section class="hero-gradient text-white section-padding">
-        <div class="px-4 md:px-8 lg:px-16 mx-auto max-w-7xl">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <!-- Content -->
-                <div class="animate-slide-up">
-                    <div class="inline-flex items-center bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                        <span class="material-symbols-outlined text-sm mr-2">verified</span>
-                        <span class="text-sm font-medium">Trusted by 50,000+ customers</span>
-                    </div>
-                    
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6">
-                        Financial Security That <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100">Grows With You</span>
-                    </h1>
-                    
-                    <p class="text-xl text-blue-100 mb-8 max-w-xl">
-                        Insurance, investments and loans — personalised plans, transparent advice for your financial journey.
-                    </p>
-                    
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <button class="flex items-center justify-center rounded-xl h-12 px-8 bg-white text-primary font-bold hover:bg-blue-50 transition-all duration-300 shadow-md transform hover:scale-105 group">
-                            <span class="material-symbols-outlined mr-2 group-hover:scale-110 transition-transform">calculate</span>
-                            Calculate My Plan
-                        </button>
-                        <button class="flex items-center justify-center rounded-xl h-12 px-8 bg-transparent text-white font-bold border-2 border-white/30 hover:border-white transition-all duration-300 transform hover:scale-105 group">
-                            <span class="material-symbols-outlined mr-2 group-hover:scale-110 transition-transform">support_agent</span>
-                            Talk to an Advisor
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Hero Visual -->
-                <div class="animate-fade-in" style="animation-delay: 0.3s;">
-                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-white/10 rounded-xl p-4 text-center">
-                                <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
-                                    <span class="material-symbols-outlined text-white">trending_up</span>
-                                </div>
-                                <h3 class="font-bold text-white">Investments</h3>
-                                <p class="text-sm text-blue-100 mt-1">Grow your wealth</p>
-                            </div>
-                            <div class="bg-white/10 rounded-xl p-4 text-center">
-                                <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
-                                    <span class="material-symbols-outlined text-white">shield</span>
-                                </div>
-                                <h3 class="font-bold text-white">Insurance</h3>
-                                <p class="text-sm text-blue-100 mt-1">Protect your family</p>
-                            </div>
-                            <div class="bg-white/10 rounded-xl p-4 text-center">
-                                <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
-                                    <span class="material-symbols-outlined text-white">credit_card</span>
-                                </div>
-                                <h3 class="font-bold text-white">Loans</h3>
-                                <p class="text-sm text-blue-100 mt-1">Flexible financing</p>
-                            </div>
-                            <div class="bg-white/10 rounded-xl p-4 text-center">
-                                <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
-                                    <span class="material-symbols-outlined text-white">account_balance</span>
-                                </div>
-                                <h3 class="font-bold text-white">Advisory</h3>
-                                <p class="text-sm text-blue-100 mt-1">Expert guidance</p>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-6 bg-white/5 rounded-xl p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-blue-100">Average annual return</p>
-                                    <p class="text-xl font-bold text-white">10.2%</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-sm text-blue-100">Customer satisfaction</p>
-                                    <p class="text-xl font-bold text-white">98%</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- Hero Section with Background Image Carousel -->
+<section class="relative text-white overflow-hidden flex items-center min-h-screen sm:min-h-[90vh]">
+
+  <!-- Background Carousel Container -->
+  <div class="absolute inset-0 z-0">
+    <div class="carousel-bg absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-100" style="background-image: url('assets/images/hero 1.jpg');"></div>
+    <div class="carousel-bg absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-0" style="background-image: url('assets/images/hero2.jpg');"></div>
+    <div class="carousel-bg absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-0" style="background-image: url('assets/images/hero3.jpg');"></div>
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-gradient-to-r from-black/50 via-black/40 to-black/30"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="relative z-10 px-6 md:px-12 lg:px-20 w-full max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center text-center lg:text-left">
+
+      <!-- Left Content -->
+      <div>
+        <div class="inline-flex items-center bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6 mx-auto lg:mx-0">
+          <span class="material-symbols-outlined text-sm mr-2">verified</span>
+          <span class="text-sm font-medium">Trusted by 50,000+ customers</span>
         </div>
-    </section>
+
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+          Financial Security That 
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100">Grows With You</span>
+        </h1>
+
+        <p class="text-lg md:text-xl text-blue-100 mb-8 max-w-xl mx-auto lg:mx-0">
+          Insurance, investments and loans — personalised plans, transparent advice for your financial journey.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+          <button class="flex items-center justify-center rounded-xl h-12 px-8 bg-white text-primary font-bold hover:bg-blue-50 transition-all duration-300 shadow-md transform hover:scale-105 group">
+            <span class="material-symbols-outlined mr-2 group-hover:scale-110 transition-transform">calculate</span>
+            Calculate My Plan
+          </button>
+          <button class="flex items-center justify-center rounded-xl h-12 px-8 bg-transparent text-white font-bold border-2 border-white/30 hover:border-white transition-all duration-300 transform hover:scale-105 group">
+            <span class="material-symbols-outlined mr-2 group-hover:scale-110 transition-transform">support_agent</span>
+            Talk to an Advisor
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Info Box -->
+      <div class="hidden lg:block bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-white/10 rounded-xl p-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+              <span class="material-symbols-outlined text-white">trending_up</span>
+            </div>
+            <h3 class="font-bold text-white">Investments</h3>
+            <p class="text-sm text-blue-100 mt-1">Grow your wealth</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+              <span class="material-symbols-outlined text-white">shield</span>
+            </div>
+            <h3 class="font-bold text-white">Insurance</h3>
+            <p class="text-sm text-blue-100 mt-1">Protect your family</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+              <span class="material-symbols-outlined text-white">credit_card</span>
+            </div>
+            <h3 class="font-bold text-white">Loans</h3>
+            <p class="text-sm text-blue-100 mt-1">Flexible financing</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+              <span class="material-symbols-outlined text-white">account_balance</span>
+            </div>
+            <h3 class="font-bold text-white">Advisory</h3>
+            <p class="text-sm text-blue-100 mt-1">Expert guidance</p>
+          </div>
+        </div>
+
+        <div class="mt-6 bg-white/5 rounded-xl p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-blue-100">Average annual return</p>
+              <p class="text-xl font-bold text-white">10.2%</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-blue-100">Customer satisfaction</p>
+              <p class="text-xl font-bold text-white">98%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Carousel Script -->
+<script>
+  const slides = document.querySelectorAll('.carousel-bg');
+  let index = 0;
+
+  function showNextSlide() {
+    slides[index].style.opacity = 0;
+    index = (index + 1) % slides.length;
+    slides[index].style.opacity = 1;
+  }
+
+  setInterval(showNextSlide, 5000);
+</script>
+
+
+
 
 <div class="relative w-full overflow-hidden mt-16">
   <div class="flex gap-16 animate-scroll whitespace-nowrap">
@@ -391,99 +423,436 @@ include 'includes/header.php';
 </style>
 
 
+<!-- ===== ABOUT SECTION START ===== -->
+<section class="about-section" id="about">
+  <div class="about-container">
+    <!-- Left Image Area -->
+    <div class="about-images scroll-animate">
+      <div class="img main-img">
+        <img src="assets/images/about-one-img-1.jpg" alt="Team Meeting">
+      </div>
+      <div class="img sub-img">
+        <img src="assets/images/about-img-2.jpg" alt="Team Working">
+      </div>
+    </div>
 
-    <!-- PRODUCTS SECTION -->
-    <section class="section-padding gradient-bg">
-        <div class="px-4 md:px-8 lg:px-16 mx-auto max-w-7xl">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-text-primary dark:text-white mb-4">Comprehensive Financial <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Solutions</span></h2>
-                <p class="text-lg text-text-secondary dark:text-slate-400 max-w-2xl mx-auto">We provide a complete range of financial products tailored to your unique needs and goals.</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Investment Card -->
-                <div class="bg-white dark:bg-card-dark p-8 rounded-2xl shadow-soft card-hover border border-border-light dark:border-slate-700">
-                    <div class="bg-primary-light dark:bg-primary/10 p-4 rounded-2xl mb-6 w-fit">
-                        <span class="material-symbols-outlined text-primary text-3xl">trending_up</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-text-primary dark:text-white mb-3">Investments & Wealth</h3>
-                    <p class="text-text-secondary dark:text-slate-400 mb-6">Grow your wealth with our curated investment options including mutual funds, stocks, and fixed deposits.</p>
-                    <ul class="space-y-3 mb-6">
-                        <li class="flex items-center text-text-secondary dark:text-slate-400">
-                            <span class="material-symbols-outlined text-primary text-lg mr-3">check_circle</span>
-                            Mutual Funds
-                        </li>
-                        <li class="flex items-center text-text-secondary dark:text-slate-400">
-                            <span class="material-symbols-outlined text-primary text-lg mr-3">check_circle</span>
-                            Fixed Deposits
-                        </li>
-                        <li class="flex items-center text-text-secondary dark:text-slate-400">
-                            <span class="material-symbols-outlined text-primary text-lg mr-3">check_circle</span>
-                            Stock Market
-                        </li>
-                    </ul>
-                    <a href="#" class="text-primary font-semibold text-sm flex items-center group">
-                        Explore Investments
-                        <span class="material-symbols-outlined text-lg ml-1 group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </a>
-                </div>
-                
-                <!-- Insurance Card -->
-                <div class="bg-white dark:bg-card-dark p-8 rounded-2xl shadow-soft card-hover border border-border-light dark:border-slate-700">
-                    <div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-2xl mb-6 w-fit">
-                        <span class="material-symbols-outlined text-secondary text-3xl">shield</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-text-primary dark:text-white mb-3">Insurance Protection</h3>
-                    <p class="text-text-secondary dark:text-slate-400 mb-6">Secure your family's future with comprehensive insurance plans for life, health, vehicle, and more.</p>
-                    <ul class="space-y-3 mb-6">
-                        <li class="flex items-center text-text-secondary dark:text-slate-400">
-                            <span class="material-symbols-outlined text-secondary text-lg mr-3">check_circle</span>
-                            Life Insurance
-                        </li>
-                        <li class="flex items-center text-text-secondary dark:text-slate-400">
-                            <span class="material-symbols-outlined text-secondary text-lg mr-3">check_circle</span>
-                            Health Insurance
-                        </li>
-                        <li class="flex items-center text-text-secondary dark:text-slate-400">
-                            <span class="material-symbols-outlined text-secondary text-lg mr-3">check_circle</span>
-                            Vehicle Insurance
-                        </li>
-                    </ul>
-                    <a href="#" class="text-secondary font-semibold text-sm flex items-center group">
-                        Explore Insurance
-                        <span class="material-symbols-outlined text-lg ml-1 group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </a>
-                </div>
-                
-                <!-- Loans Card -->
-                <div class="bg-white dark:bg-card-dark p-8 rounded-2xl shadow-soft card-hover border border-border-light dark:border-slate-700">
-                    <div class="bg-teal-50 dark:bg-teal-900/20 p-4 rounded-2xl mb-6 w-fit">
-                        <span class="material-symbols-outlined text-tertiary text-3xl">real_estate_agent</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-text-primary dark:text-white mb-3">Loans & Credit</h3>
-                    <p class="text-text-secondary dark:text-slate-400 mb-6">Access flexible financing options for personal needs, home purchases, business expansion, and more.</p>
-                    <ul class="space-y-3 mb-6">
-                        <li class="flex items-center text-text-secondary dark:text-slate-400">
-                            <span class="material-symbols-outlined text-tertiary text-lg mr-3">check_circle</span>
-                            Personal Loans
-                        </li>
-                        <li class="flex items-center text-text-secondary dark:text-slate-400">
-                            <span class="material-symbols-outlined text-tertiary text-lg mr-3">check_circle</span>
-                            Home Loans
-                        </li>
-                        <li class="flex items-center text-text-secondary dark:text-slate-400">
-                            <span class="material-symbols-outlined text-tertiary text-lg mr-3">check_circle</span>
-                            Business Loans
-                        </li>
-                    </ul>
-                    <a href="#" class="text-tertiary font-semibold text-sm flex items-center group">
-                        Explore Loans
-                        <span class="material-symbols-outlined text-lg ml-1 group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </a>
-                </div>
-            </div>
+    <!-- Right Content Area -->
+    <div class="about-content scroll-animate">
+      <p class="section-subtitle">>>> Who We Are <<<</p>
+      <h2 class="section-title">We provide the best<br>insurance policy</h2>
+      <h3 class="section-highlight">Your Partner in Financial Growth &amp; Security.</h3>
+
+      <ul class="about-list">
+        <li><span>✔</span> Comprehensive Coverage</li>
+        <li><span>✔</span> Affordable Premiums</li>
+        <li><span>✔</span> Trusted Support</li>
+      </ul>
+
+      <p class="about-text">
+        At PaySure, we believe financial well-being is the foundation of a secure and fulfilling life. 
+        With this belief at our core, we’ve built a platform that empowers both individuals and businesses 
+        through smart, trustworthy, and customized financial solutions.
+      </p>
+
+      <a href="about.php" class="btn-discover">Discover More</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CSS ===== -->
+<style>
+/* ---------- Base Layout ---------- */
+.about-section {
+  padding: 100px 0;
+  background: #fff;
+  overflow: hidden;
+  position: relative;
+}
+
+.about-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 60px;
+}
+
+/* ---------- Image Section ---------- */
+.about-images {
+  flex: 1 1 45%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(60px);
+  transition: all 1s ease;
+}
+
+.about-images.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.about-images .img {
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.about-images .main-img {
+  width: 340px;
+  z-index: 2;
+}
+
+.about-images .sub-img {
+  width: 250px;
+  position: absolute;
+  left: -60px;
+  top: 80px;
+  z-index: 1;
+  filter: brightness(0.95);
+}
+
+.about-images img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+.about-images .img:hover img {
+  transform: scale(1.05);
+}
+
+/* ---------- Text Section ---------- */
+.about-content {
+  flex: 1 1 50%;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: all 1s ease;
+}
+
+.about-content.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.section-subtitle {
+  color: #0066cc;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  color: #111;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+
+.section-highlight {
+  color: #0066cc;
+  font-weight: 600;
+  margin-bottom: 25px;
+}
+
+.about-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 25px;
+}
+
+.about-list li {
+  margin-bottom: 10px;
+  font-size: 1.05rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.about-list li span {
+  color: #00b4d8;
+  font-size: 1.3rem;
+}
+
+/* ---------- Button ---------- */
+.btn-discover {
+  display: inline-block;
+  background: linear-gradient(90deg, #007bff, #ff007f);
+  color: #fff;
+  padding: 12px 30px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: all 0.4s ease;
+}
+
+.btn-discover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 992px) {
+  .about-container {
+    flex-direction: column;
+  }
+  .about-images .sub-img {
+    position: absolute;
+    left: -30px;
+    top: 50px;
+    width: 220px;
+  }
+  .section-title {
+    font-size: 2rem;
+  }
+}
+</style>
+
+<!-- ===== JavaScript Scroll Animation ===== -->
+<script>
+// Smooth scroll-triggered animation
+const animatedElements = document.querySelectorAll('.scroll-animate');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show');
+    }
+  });
+}, { threshold: 0.3 });
+
+animatedElements.forEach(el => observer.observe(el));
+</script>
+<!-- ===== ABOUT SECTION END ===== -->
+
+
+
+<section class="section-padding gradient-bg">
+    <div class="px-4 md:px-8 lg:px-16 mx-auto max-w-7xl">
+
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-text-primary dark:text-white mb-4">
+                Comprehensive Financial 
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+                    Solutions
+                </span>
+            </h2>
+            <p class="text-lg text-text-secondary dark:text-slate-400 max-w-2xl mx-auto">
+                We provide a complete range of financial products tailored to your unique needs and goals.
+            </p>
         </div>
-    </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+
+            <!-- Investment Card -->
+            <div class="electric-card bg-white dark:bg-card-dark p-8 rounded-2xl shadow-soft">
+                <div class="bg-primary-light dark:bg-primary/10 p-4 rounded-2xl mb-6 w-fit">
+                    <span class="material-symbols-outlined text-primary text-3xl">trending_up</span>
+                </div>
+
+                <h3 class="text-xl font-bold text-text-primary dark:text-white mb-3">
+                    Investments & Wealth
+                </h3>
+
+                <p class="text-text-secondary dark:text-slate-400 mb-6">
+                    Grow your wealth with our curated investment options including mutual funds, stocks, and fixed deposits.
+                </p>
+
+                <ul class="space-y-3 mb-6">
+                    <li class="flex items-center text-text-secondary dark:text-slate-400">
+                        <span class="material-symbols-outlined text-primary text-lg mr-3">check_circle</span>
+                        Mutual Funds
+                    </li>
+                    <li class="flex items-center text-text-secondary dark:text-slate-400">
+                        <span class="material-symbols-outlined text-primary text-lg mr-3">check_circle</span>
+                        Fixed Deposits
+                    </li>
+                    <li class="flex items-center text-text-secondary dark:text-slate-400">
+                        <span class="material-symbols-outlined text-primary text-lg mr-3">check_circle</span>
+                        Stock Market
+                    </li>
+                </ul>
+
+                <a href="#" class="text-primary font-semibold text-sm flex items-center group">
+                    Explore Investments
+                    <span class="material-symbols-outlined text-lg ml-1 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </a>
+            </div>
+
+
+
+            <!-- Insurance Card -->
+            <div class="electric-card bg-white dark:bg-card-dark p-8 rounded-2xl shadow-soft">
+                <div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-2xl mb-6 w-fit">
+                    <span class="material-symbols-outlined text-secondary text-3xl">shield</span>
+                </div>
+
+                <h3 class="text-xl font-bold text-text-primary dark:text-white mb-3">
+                    Insurance Protection
+                </h3>
+
+                <p class="text-text-secondary dark:text-slate-400 mb-6">
+                    Secure your family's future with comprehensive insurance plans for life, health, vehicle, and more.
+                </p>
+
+                <ul class="space-y-3 mb-6">
+                    <li class="flex items-center text-text-secondary dark:text-slate-400">
+                        <span class="material-symbols-outlined text-secondary text-lg mr-3">check_circle</span>
+                        Life Insurance
+                    </li>
+                    <li class="flex items-center text-text-secondary dark:text-slate-400">
+                        <span class="material-symbols-outlined text-secondary text-lg mr-3">check_circle</span>
+                        Health Insurance
+                    </li>
+                    <li class="flex items-center text-text-secondary dark:text-slate-400">
+                        <span class="material-symbols-outlined text-secondary text-lg mr-3">check_circle</span>
+                        Vehicle Insurance
+                    </li>
+                </ul>
+
+                <a href="#" class="text-secondary font-semibold text-sm flex items-center group">
+                    Explore Insurance
+                    <span class="material-symbols-outlined text-lg ml-1 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </a>
+            </div>
+
+
+
+            <!-- Loans Card -->
+            <div class="electric-card bg-white dark:bg-card-dark p-8 rounded-2xl shadow-soft">
+                <div class="bg-teal-50 dark:bg-teal-900/20 p-4 rounded-2xl mb-6 w-fit">
+                    <span class="material-symbols-outlined text-tertiary text-3xl">real_estate_agent</span>
+                </div>
+
+                <h3 class="text-xl font-bold text-text-primary dark:text-white mb-3">
+                    Loans & Credit
+                </h3>
+
+                <p class="text-text-secondary dark:text-slate-400 mb-6">
+                    Access flexible financing options for personal needs, home purchases, business expansion, and more.
+                </p>
+
+                <ul class="space-y-3 mb-6">
+                    <li class="flex items-center text-text-secondary dark:text-slate-400">
+                        <span class="material-symbols-outlined text-tertiary text-lg mr-3">check_circle</span>
+                        Personal Loans
+                    </li>
+                    <li class="flex items-center text-text-secondary dark:text-slate-400">
+                        <span class="material-symbols-outlined text-tertiary text-lg mr-3">check_circle</span>
+                        Home Loans
+                    </li>
+                    <li class="flex items-center text-text-secondary dark:text-slate-400">
+                        <span class="material-symbols-outlined text-tertiary text-lg mr-3">check_circle</span>
+                        Business Loans
+                    </li>
+                </ul>
+
+                <a href="#" class="text-tertiary font-semibold text-sm flex items-center group">
+                    Explore Loans
+                    <span class="material-symbols-outlined text-lg ml-1 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<style>
+ /* ===========================
+   STYLE A – ELECTRIC GLOW BORDER
+   =========================== */
+.electric-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.electric-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(
+        135deg,
+        #00eaff,
+        #009dff,
+        #00eaff
+    );
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    animation: electricBorderMove 4s linear infinite;
+    opacity: 0.9;
+}
+
+@keyframes electricBorderMove {
+    0% { filter: hue-rotate(0deg); }
+    50% { filter: hue-rotate(180deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+/* Outer glow */
+.electric-card::after {
+    content: "";
+    position: absolute;
+    inset: -10px;
+    border-radius: 30px;
+    background: radial-gradient(
+        circle,
+        rgba(0, 200, 255, 0.5),
+        transparent 60%
+    );
+    filter: blur(20px);
+    animation: electricPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes electricPulse {
+    0% { opacity: 0.4; }
+    100% { opacity: 0.9; }
+}
+
+/* Hover effect for electric card */
+.electric-card {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.electric-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 20px 40px rgba(0, 200, 255, 0.25);
+}
+
+/* Make electric glow stronger on hover */
+.electric-card:hover::after {
+    opacity: 1;
+    filter: blur(25px);
+}
+
+.electric-card:hover::before {
+    opacity: 1;
+}
+
+</style>
 
     <!-- LOWEST PRICE GUARANTEE SECTION -->
     <section class="section-padding bg-white dark:bg-slate-900/50">

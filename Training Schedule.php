@@ -1,9 +1,13 @@
+<?php
+// THIS MUST BE THE FIRST LINE
+include_once 'includes/config.php'; 
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schedule - PaySure</title>
+    <title>Training & Schedule - PaySure</title>
     <style>
         /* CSS variables and base styles */
         :root {
@@ -12,6 +16,7 @@
             --accent: #ff6b00;
             --light: #f8f9fa;
             --dark: #212529;
+            --zoom: #2D8CFF;
         }
         
         * {
@@ -39,7 +44,7 @@
             background-size: cover;
             background-position: center;
             color: white;
-            padding: 100px 0;
+            padding: 80px 0;
             text-align: center;
         }
         
@@ -76,12 +81,12 @@
         }
         
         .section {
-            padding: 80px 0;
+            padding: 60px 0;
         }
         
         .section-title {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
         }
         
         .section-title h2 {
@@ -170,6 +175,8 @@
             font-size: 1.5rem;
             display: flex;
             align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
         }
         
         .day-title:before {
@@ -188,10 +195,12 @@
         
         .event-item {
             padding: 20px;
-            border-left: 3px solid var(--secondary);
+            border-left: 4px solid var(--accent);
             margin-bottom: 20px;
-            background-color: #f9f9f9;
-            border-radius: 0 8px 8px 0;
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-left-width: 4px;
+            border-radius: 4px;
             transition: all 0.3s ease;
         }
         
@@ -200,12 +209,20 @@
             transform: translateX(5px);
         }
         
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
         .event-time {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary);
             margin-bottom: 5px;
             display: flex;
             align-items: center;
+            font-size: 0.95rem;
         }
         
         .event-time:before {
@@ -224,16 +241,36 @@
             margin-bottom: 10px;
         }
         
-        .event-location {
-            color: #777;
+        .trainer-info {
             font-size: 0.9rem;
-            display: flex;
-            align-items: center;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: 600;
+            background: #f0f5ff;
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
         }
-        
-        .event-location:before {
-            content: '📍';
-            margin-right: 5px;
+
+        .zoom-btn {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--zoom);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .zoom-btn:hover {
+            background-color: #1a6ad4;
+        }
+
+        .zoom-btn span {
+            margin-left: 8px;
         }
         
         .calendar-section {
@@ -279,86 +316,64 @@
         
         .calendar-date {
             background-color: white;
-            padding: 15px 10px;
+            padding: 10px 5px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
         }
         
         .calendar-date:hover {
             background-color: #f0f5ff;
         }
         
-        .calendar-date.has-event:after {
-            content: '';
-            position: absolute;
-            bottom: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 6px;
-            height: 6px;
+        .cal-event-text {
+            font-size: 0.7rem;
             background-color: var(--accent);
-            border-radius: 50%;
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            margin-top: 4px;
+            width: 90%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
         }
-        
-        .calendar-date.active {
+
+        .calendar-date.active .date-num {
             background-color: var(--primary);
             color: white;
+            padding: 2px 6px;
+            border-radius: 50%;
         }
         
         .calendar-date.other-month {
             color: #ccc;
+            background-color: #f9f9f9;
         }
         
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.2rem;
-            }
-            
-            .section-title h2 {
-                font-size: 2rem;
-            }
-            
-            .schedule-tabs {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .tab-btn {
-                width: 100%;
-                text-align: center;
-                border-bottom: 1px solid #eee;
-            }
-            
-            .calendar-grid {
-                grid-template-columns: repeat(7, 1fr);
-                font-size: 0.8rem;
-            }
-            
-            .calendar-date, .calendar-day {
-                padding: 10px 5px;
-            }
+            .event-header { flex-direction: column; }
+            .zoom-btn { width: 100%; justify-content: center; margin-top: 10px; }
+            .calendar-grid { font-size: 0.8rem; }
+            .calendar-date { min-height: 70px; padding: 10px 5px; }
+            .cal-event-text { font-size: 0.6rem; }
         }
     </style>
 </head>
@@ -383,105 +398,55 @@ include 'includes/header.php';
             </div>
             
             <div class="schedule-tabs">
-                <button class="tab-btn active" data-tab="week">This Week</button>
-                <button class="tab-btn" data-tab="month">This Month</button>
-                <button class="tab-btn" data-tab="quarter">Next Quarter</button>
+                <button class="tab-btn active" data-tab="week">Upcoming</button>
             </div>
             
             <div class="schedule-content active" id="week-tab">
-                <div class="schedule-day">
-                    <h3 class="day-title">Monday, November 20</h3>
-                    <ul class="event-list">
-                        <li class="event-item">
-                            <div class="event-time">10:00 AM - 12:00 PM</div>
-                            <h4 class="event-title">Financial Planning Workshop</h4>
-                            <p class="event-description">Learn the basics of financial planning and how to secure your future with our ACE plans.</p>
-                            <div class="event-location">PaySure Head Office, Conference Room A</div>
-                        </li>
-                        <li class="event-item">
-                            <div class="event-time">2:00 PM - 4:00 PM</div>
-                            <h4 class="event-title">New Distributor Orientation</h4>
-                            <p class="event-description">Introduction session for new distributors to understand the PaySure opportunity.</p>
-                            <div class="event-location">Online - Zoom Meeting</div>
-                        </li>
-                    </ul>
-                </div>
+                <?php
+                // FETCH UPCOMING EVENTS FROM DATABASE
+                $sql = "SELECT * FROM training_events WHERE event_date >= CURDATE() AND status='Active' ORDER BY event_date ASC LIMIT 5";
                 
-                <div class="schedule-day">
-                    <h3 class="day-title">Wednesday, November 22</h3>
-                    <ul class="event-list">
-                        <li class="event-item">
-                            <div class="event-time">11:00 AM - 1:00 PM</div>
-                            <h4 class="event-title">Advanced Sales Techniques</h4>
-                            <p class="event-description">Master advanced sales strategies to boost your performance as a PaySure distributor.</p>
-                            <div class="event-location">PaySure Training Center</div>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="schedule-day">
-                    <h3 class="day-title">Friday, November 24</h3>
-                    <ul class="event-list">
-                        <li class="event-item">
-                            <div class="event-time">9:00 AM - 5:00 PM</div>
-                            <h4 class="event-title">Regional Distributor Meet</h4>
-                            <p class="event-description">Quarterly meeting for regional distributors to discuss performance and strategies.</p>
-                            <div class="event-location">Grand Hotel Convention Center</div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="schedule-content" id="month-tab">
-                <div class="schedule-day">
-                    <h3 class="day-title">Monday, November 27</h3>
-                    <ul class="event-list">
-                        <li class="event-item">
-                            <div class="event-time">3:00 PM - 5:00 PM</div>
-                            <h4 class="event-title">Digital Marketing for Distributors</h4>
-                            <p class="event-description">Learn how to leverage digital platforms to expand your client base.</p>
-                            <div class="event-location">Online - Webinar</div>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="schedule-day">
-                    <h3 class="day-title">Thursday, November 30</h3>
-                    <ul class="event-list">
-                        <li class="event-item">
-                            <div class="event-time">10:00 AM - 12:00 PM</div>
-                            <h4 class="event-title">Monthly Performance Review</h4>
-                            <p class="event-description">Review of monthly performance and goal setting for the upcoming month.</p>
-                            <div class="event-location">PaySure Head Office</div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="schedule-content" id="quarter-tab">
-                <div class="schedule-day">
-                    <h3 class="day-title">Monday, December 4</h3>
-                    <ul class="event-list">
-                        <li class="event-item">
-                            <div class="event-time">All Day</div>
-                            <h4 class="event-title">Quarterly Leadership Conference</h4>
-                            <p class="event-description">Exclusive conference for top-performing distributors and team leaders.</p>
-                            <div class="event-location">Resort Paradise, Goa</div>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="schedule-day">
-                    <h3 class="day-title">Friday, December 15</h3>
-                    <ul class="event-list">
-                        <li class="event-item">
-                            <div class="event-time">10:00 AM - 4:00 PM</div>
-                            <h4 class="event-title">Annual Business Planning Workshop</h4>
-                            <p class="event-description">Strategic planning session for the upcoming year with goal setting and strategy development.</p>
-                            <div class="event-location">PaySure Corporate Office</div>
-                        </li>
-                    </ul>
-                </div>
+                // Using the $conn that was created in config.php
+                if(isset($conn)) {
+                    $result = $conn->query($sql);
+
+                    if ($result && $result->num_rows > 0) {
+                        while($row = $result->fetch_assoc()) {
+                            $eventDate = date('l, F d', strtotime($row['event_date']));
+                            $startTime = date('h:i A', strtotime($row['start_time']));
+                            $endTime = date('h:i A', strtotime($row['end_time']));
+                    ?>
+                    <div class="schedule-day">
+                        <h3 class="day-title"><?php echo $eventDate; ?></h3>
+                        <ul class="event-list">
+                            <li class="event-item">
+                                <div class="event-header">
+                                    <div>
+                                        <div class="event-time"><?php echo $startTime . ' - ' . $endTime; ?></div>
+                                        <h4 class="event-title"><?php echo htmlspecialchars($row['title']); ?></h4>
+                                        <?php if(!empty($row['trainer_name'])): ?>
+                                            <div class="trainer-info">👨‍🏫 Trainer: <?php echo htmlspecialchars($row['trainer_name']); ?></div>
+                                        <?php endif; ?>
+                                        <p class="event-description"><?php echo htmlspecialchars($row['description']); ?></p>
+                                    </div>
+                                    <?php if(!empty($row['meeting_link'])): ?>
+                                    <a href="<?php echo $row['meeting_link']; ?>" target="_blank" class="zoom-btn">
+                                        <i class="fas fa-video"></i> <span>Join Meeting</span>
+                                    </a>
+                                    <?php endif; ?>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <?php 
+                        } 
+                    } else {
+                        echo '<p style="text-align:center; color:#666;">No upcoming events scheduled at the moment.</p>';
+                    }
+                } else {
+                    echo '<p style="text-align:center; color:red;">Database connection error. Please check config.</p>';
+                }
+                ?>
             </div>
         </div>
     </section>
@@ -494,10 +459,34 @@ include 'includes/header.php';
             </div>
             
             <div class="calendar">
+                <?php
+                    $currentYear = date('Y');
+                    $currentMonth = date('m');
+                    $currentMonthName = date('F');
+                    $daysInMonth = date('t'); 
+                    $firstDayOfWeek = date('w', strtotime("$currentYear-$currentMonth-01"));
+                    
+                    // FETCH EVENTS FOR CALENDAR
+                    $eventsByDay = [];
+                    if(isset($conn)) {
+                        $calSql = "SELECT DAY(event_date) as day_num, title FROM training_events 
+                                   WHERE MONTH(event_date) = '$currentMonth' 
+                                   AND YEAR(event_date) = '$currentYear' 
+                                   AND status = 'Active'";
+                        $calResult = $conn->query($calSql);
+                        if($calResult) {
+                            while($cRow = $calResult->fetch_assoc()) {
+                                $eventsByDay[$cRow['day_num']][] = $cRow['title'];
+                            }
+                        }
+                    }
+                ?>
+
                 <div class="calendar-header">
-                    <h3>November 2023</h3>
-                    <p>Upcoming Events at PaySure</p>
+                    <h3><?php echo "$currentMonthName $currentYear"; ?></h3>
+                    <p>Training & Events Schedule</p>
                 </div>
+
                 <div class="calendar-grid">
                     <div class="calendar-day">Sun</div>
                     <div class="calendar-day">Mon</div>
@@ -507,48 +496,45 @@ include 'includes/header.php';
                     <div class="calendar-day">Fri</div>
                     <div class="calendar-day">Sat</div>
                     
-                    <!-- Previous month dates -->
-                    <div class="calendar-date other-month">29</div>
-                    <div class="calendar-date other-month">30</div>
-                    <div class="calendar-date other-month">31</div>
-                    <div class="calendar-date">1</div>
-                    <div class="calendar-date">2</div>
-                    <div class="calendar-date">3</div>
-                    <div class="calendar-date">4</div>
+                    <?php
+                    // 1. Previous Month Filler
+                    $prevMonthTotalDays = date('t', strtotime("-1 month"));
+                    $startFiller = $prevMonthTotalDays - $firstDayOfWeek + 1;
+
+                    for ($i = 0; $i < $firstDayOfWeek; $i++) {
+                        echo '<div class="calendar-date other-month">' . ($startFiller + $i) . '</div>';
+                    }
+
+                    // 2. Current Month Dates Loop
+                    for ($day = 1; $day <= $daysInMonth; $day++) {
+                        $classes = 'calendar-date';
+                        
+                        if ($day == date('d')) {
+                            $classes .= ' active';
+                        }
+                        
+                        echo '<div class="'.$classes.'" onclick="showEventAlert('.$day.')">';
+                        echo '<span class="date-num">' . $day . '</span>';
+                        
+                        if (isset($eventsByDay[$day])) {
+                            foreach($eventsByDay[$day] as $evtTitle) {
+                                echo '<div class="cal-event-text" title="'.htmlspecialchars($evtTitle).'">' . htmlspecialchars($evtTitle) . '</div>';
+                            }
+                        }
+                        
+                        echo '</div>';
+                    }
+
+                    // 3. Next Month Filler
+                    $totalSlotsFilled = $firstDayOfWeek + $daysInMonth;
+                    $remainingSlots = 7 - ($totalSlotsFilled % 7);
                     
-                    <!-- Current month dates -->
-                    <div class="calendar-date">5</div>
-                    <div class="calendar-date">6</div>
-                    <div class="calendar-date">7</div>
-                    <div class="calendar-date">8</div>
-                    <div class="calendar-date">9</div>
-                    <div class="calendar-date">10</div>
-                    <div class="calendar-date">11</div>
-                    
-                    <div class="calendar-date">12</div>
-                    <div class="calendar-date">13</div>
-                    <div class="calendar-date">14</div>
-                    <div class="calendar-date">15</div>
-                    <div class="calendar-date">16</div>
-                    <div class="calendar-date">17</div>
-                    <div class="calendar-date">18</div>
-                    
-                    <div class="calendar-date">19</div>
-                    <div class="calendar-date has-event active">20</div>
-                    <div class="calendar-date">21</div>
-                    <div class="calendar-date has-event">22</div>
-                    <div class="calendar-date">23</div>
-                    <div class="calendar-date has-event">24</div>
-                    <div class="calendar-date">25</div>
-                    
-                    <div class="calendar-date">26</div>
-                    <div class="calendar-date has-event">27</div>
-                    <div class="calendar-date">28</div>
-                    <div class="calendar-date">29</div>
-                    <div class="calendar-date has-event">30</div>
-                    <!-- Next month dates -->
-                    <div class="calendar-date other-month">1</div>
-                    <div class="calendar-date other-month">2</div>
+                    if ($remainingSlots < 7) {
+                        for ($i = 1; $i <= $remainingSlots; $i++) {
+                            echo '<div class="calendar-date other-month">' . $i . '</div>';
+                        }
+                    }
+                    ?>
                 </div>
             </div>
         </div>
@@ -559,38 +545,24 @@ include 'includes/footer.php';
 ?>
 
     <script>
-        // Schedule Tabs Functionality
         document.addEventListener('DOMContentLoaded', function() {
             const tabButtons = document.querySelectorAll('.tab-btn');
             const tabContents = document.querySelectorAll('.schedule-content');
             
             tabButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    // Remove active class from all buttons and contents
                     tabButtons.forEach(btn => btn.classList.remove('active'));
                     tabContents.forEach(content => content.classList.remove('active'));
-                    
-                    // Add active class to clicked button
                     this.classList.add('active');
-                    
-                    // Show corresponding content
                     const tabId = this.getAttribute('data-tab');
                     document.getElementById(`${tabId}-tab`).classList.add('active');
                 });
             });
-            
-            // Calendar date click functionality
-            const calendarDates = document.querySelectorAll('.calendar-date:not(.other-month)');
-            calendarDates.forEach(date => {
-                date.addEventListener('click', function() {
-                    calendarDates.forEach(d => d.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // In a real application, you would show events for the selected date
-                    alert('Showing events for ' + this.textContent + ' November 2023');
-                });
-            });
         });
+        
+        function showEventAlert(day) {
+           // Alert removed as requested
+        }
     </script>
 </body>
 </html>

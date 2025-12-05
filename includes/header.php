@@ -297,28 +297,28 @@
           <div class="dropdown" role="menu" aria-hidden="true">
             <a href="#" class="dropdown-item" role="menuitem">
               <div class="dropdown-icon"><i class="fa-solid fa-umbrella"></i></div>
-              <div class="dropdown-text">Term Life Renewal</div>
+              <div class="dropdown-text">Life Insurance</div>
             </a>
             <a href="#" class="dropdown-item" role="menuitem">
               <div class="dropdown-icon"><i class="fa-solid fa-piggy-bank"></i></div>
-              <div class="dropdown-text">Investment Renewal</div>
+              <div class="dropdown-text">General Insurance</div>
             </a>
             <a href="#" class="dropdown-item" role="menuitem">
               <div class="dropdown-icon"><i class="fa-solid fa-heart"></i></div>
-              <div class="dropdown-text">Health Renewal</div>
+              <div class="dropdown-text">Health Insurance</div>
             </a>
             <a href="#" class="dropdown-item" role="menuitem">
               <div class="dropdown-icon"><i class="fa-solid fa-car"></i></div>
-              <div class="dropdown-text">Motor Renewal</div>
+              <div class="dropdown-text">Mutual Funds</div>
             </a>
-            <a href="#" class="dropdown-item" role="menuitem">
+            <!-- <a href="#" class="dropdown-item" role="menuitem">
               <div class="dropdown-icon"><i class="fa-solid fa-motorcycle"></i></div>
               <div class="dropdown-text">Two Wheeler Renewal</div>
-            </a>
-            <a href="#" class="dropdown-item" role="menuitem">
+            </a> -->
+            <!-- <a href="#" class="dropdown-item" role="menuitem">
               <div class="dropdown-icon"><i class="fa-solid fa-home"></i></div>
               <div class="dropdown-text">Home Insurance Renewal</div>
-            </a>
+            </a> -->
           </div>
         </div>
 
@@ -389,7 +389,7 @@
             </div>
           </div>
 
-          <a href="#" class="nav-link btn-login-inline">Sign in</a>
+          <a href="login.php" class="nav-link btn-login-inline">Login</a>
         </div>
       </nav>
 
