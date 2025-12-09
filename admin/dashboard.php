@@ -383,8 +383,9 @@ if (isset($_POST['upload_profile'])) {
                         <li><a href="manage_gallery.php">Gallery Section</a></li>
                         <li><a href="manage_training.php">Traning Schedule</a></li>
                         <li><a href="manage_welcome_letter.php">Welcome Letter</a></li>
-                        <!-- <li><a href="manage_genealogy.php">Genealogy</a></li> -->
                         <li><a href="admin_genealogy.php">GenealogyTree</a></li>
+                        <li><a href="manage_graph.php">Graph</a></li>
+                        <li><a href="manage_downloads.php">DownloadsSec</a></li>
                     </ul>
                 </li>
 

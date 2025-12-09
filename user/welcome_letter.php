@@ -1,13 +1,16 @@
 <?php
 session_start(); 
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "paysure_insurance";
+// 1. Include your specific DB connection file
+include '../includes/db.php';
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) { die("Connection failed: " . $conn->connect_error); }
+// 2. Assign the PDO connection variable from db.php to $conn
+// Your db.php creates a variable named $pdo, so we use that.
+if (isset($pdo)) {
+    $conn = $pdo;
+} else {
+    die("Database connection error: \$pdo variable not found in db.php");
+}
 
 // --- LOGIC TO FIND THE USER ID ---
 $user_id = 0;
@@ -25,8 +28,10 @@ if($user_id == 0) {
 
 // --- CHECK IF LETTER IS SENT ---
 $check_sql = "SELECT * FROM users WHERE id = $user_id";
-$check_result = $conn->query($check_sql);
-$user_data = $check_result->fetch_assoc();
+// PDO Query
+$stmt = $conn->query($check_sql);
+// PDO Fetch
+$user_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$user_data) {
     die("User not found.");
@@ -43,8 +48,11 @@ if (!isset($user_data['welcome_letter_sent']) || $user_data['welcome_letter_sent
 }
 
 // Fetch Letter Content
-$letter_res = $conn->query("SELECT * FROM welcome_letter_settings WHERE id=1");
-$letter = ($letter_res->num_rows > 0) ? $letter_res->fetch_assoc() : [
+$stmt_settings = $conn->query("SELECT * FROM welcome_letter_settings WHERE id=1");
+$letter_data = $stmt_settings->fetch(PDO::FETCH_ASSOC);
+
+// Use fetched data or defaults if empty
+$letter = $letter_data ? $letter_data : [
     'header_title' => 'PAYSURE', 'tagline' => 'Caring For Your Life',
     'greeting_text' => 'Dear Partner,', 'intro_paragraph' => 'Welcome...',
     'highlight_text' => 'Highlights...', 'step_section_title' => 'Steps',

@@ -2,32 +2,69 @@
 session_start();
 
 // --- 1. DATABASE CONNECTION ---
-$host = 'localhost';
-$dbname = 'paysure_insurance';
-$username = 'root';
-$password = '';
+include '../includes/db.php';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Connection failed");
+// Ensure $pdo variable is available (handles case if db.php uses $db)
+if (!isset($pdo) && isset($db)) {
+    $pdo = $db;
 }
 
 // --- 2. SECURITY CHECK ---
-// If not logged in, redirect away
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit;
 }
 
-// --- 3. IMAGE UPLOAD LOGIC ---
+// --- 3. REAL GROWTH GRAPH LOGIC (Audio Based: Business Volume & Comparison) ---
+$months = [];
+$companyData = [];
+$selfData = [];
+$current_member_id = $_SESSION['username']; 
+
+// We assume an average joining package value to calculate "Company Business Volume"
+// You can change this 5000 to your actual package price.
+$avg_package_price = 5000; 
+
+// Loop through the last 6 months
+for ($i = 5; $i >= 0; $i--) {
+    $monthLabel = date('M Y', strtotime("-$i months")); // e.g., "Oct 2023"
+    $monthQuery = date('Y-m', strtotime("-$i months")); // e.g., "2023-10"
+    $months[] = $monthLabel;
+
+    // A. Company Business: (Total Joinings * Price) = Total Volume
+    // The audio emphasizes "Company Business" (e.g., 10 Lakhs), not just counts.
+    try {
+        $stmt = $pdo->prepare("SELECT COUNT(id) FROM users WHERE DATE_FORMAT(created_at, '%Y-%m') = ?");
+        $stmt->execute([$monthQuery]);
+        $count = $stmt->fetchColumn() ?: 0;
+        $companyData[] = $count * $avg_package_price; 
+    } catch (Exception $e) {
+        $companyData[] = 0;
+    }
+
+    // B. Self Business: Sum of Commissions/Earnings
+    // The audio emphasizes "My Business" (e.g., 1 Lakh)
+    try {
+        $stmt = $pdo->prepare("SELECT SUM(total_payable_commission) FROM user_paid_unpaid_report WHERE member_id = ? AND DATE_FORMAT(payment_date, '%Y-%m') = ?");
+        $stmt->execute([$current_member_id, $monthQuery]);
+        $selfData[] = $stmt->fetchColumn() ?: 0;
+    } catch (Exception $e) {
+        $selfData[] = 0;
+    }
+}
+
+// Prepare JSON for JavaScript
+$jsLabels = json_encode($months);
+$jsCompanyData = json_encode($companyData);
+$jsSelfData = json_encode($selfData);
+
+
+// --- 4. IMAGE UPLOAD LOGIC ---
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['profile_image'])) {
     $file = $_FILES['profile_image'];
     
     if ($file['error'] === 0) {
         $uploadDir = 'uploads/profile/';
-        // Create folder if it doesn't exist
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
@@ -36,19 +73,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['profile_image'])) {
         $allowed = ['jpg', 'jpeg', 'png', 'gif'];
         
         if (in_array(strtolower($ext), $allowed)) {
-            // Create unique filename
             $newFilename = "user_" . $_SESSION['user_id'] . "_" . time() . "." . $ext;
             $destination = $uploadDir . $newFilename;
 
             if (move_uploaded_file($file['tmp_name'], $destination)) {
-                // Update Database
                 $stmt = $pdo->prepare("UPDATE users SET profile_image = ? WHERE id = ?");
                 $stmt->execute([$newFilename, $_SESSION['user_id']]);
                 
-                // Update Session
                 $_SESSION['profile_image'] = $newFilename;
                 
-                // Refresh page
                 header("Location: client_dashboard.php");
                 exit;
             }
@@ -56,8 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['profile_image'])) {
     }
 }
 
-// --- 4. DETERMINE WHICH IMAGE TO SHOW ---
-$userImage = "https://i.pravatar.cc/150?u=" . $_SESSION['username']; // Default
+// --- 5. DETERMINE WHICH IMAGE TO SHOW ---
+$userImage = "https://i.pravatar.cc/150?u=" . $_SESSION['username']; 
 if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SESSION['profile_image'])) {
     $userImage = 'uploads/profile/' . $_SESSION['profile_image'];
 }
@@ -77,7 +110,7 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
     <style>
         /* --- 1. General Reset & Variables --- */
         :root {
-            --bg-color: #FFF5EB; /* The light peach background */
+            --bg-color: #FFF5EB;
             --sidebar-bg: #ffffff;
             --text-main: #333;
             --text-light: #888;
@@ -87,18 +120,13 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             --accent-red: #F7525F;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
         body {
             background-color: var(--bg-color);
             display: flex;
             height: 100vh;
-            overflow: hidden; /* Prevent body scroll, scroll content instead */
+            overflow: hidden;
             position: relative;
         }
 
@@ -113,7 +141,6 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             flex-direction: column;
             gap: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            /* Smooth transition for mobile toggle */
             transition: all 0.3s ease-in-out;
             z-index: 1000;
         }
@@ -121,17 +148,13 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
         .logo {
             display: flex;
             align-items: center;
-            gap: 8px; /* space between logo and text */
+            gap: 8px;
             font-size: 24px;
             font-weight: bold;
         }
 
-        .logo img {
-            width: 32px;   /* adjust as needed */
-            height: auto;
-        }
+        .logo img { width: 32px; height: auto; }
 
-        /* Mobile Close Button (Hidden on Desktop) */
         .sidebar-close-btn {
             display: none;
             position: absolute;
@@ -151,15 +174,11 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             border-radius: 10px;
             transition: 0.3s;
             font-weight: 500;
-            cursor: pointer; /* Ensure pointer for divs behaving as links */
+            cursor: pointer;
         }
 
-        .menu-item i.menu-icon {
-            width: 25px;
-            margin-right: 10px;
-        }
+        .menu-item i.menu-icon { width: 25px; margin-right: 10px; }
 
-        /* The active 'Home' button style */
         .menu-item.active {
             background-color: var(--accent-orange);
             color: white;
@@ -173,17 +192,15 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
 
         /* --- NEW SIDEBAR SUBMENU STYLES --- */
         .sidebar-submenu {
-            display: none; /* Hidden by default */
+            display: none;
             flex-direction: column;
-            padding-left: 50px; /* Indent to look hierarchical */
+            padding-left: 50px;
             gap: 5px;
-            margin-top: -10px; /* Pull closer to parent */
+            margin-top: -10px;
             margin-bottom: 5px;
         }
 
-        .sidebar-submenu.show {
-            display: flex;
-        }
+        .sidebar-submenu.show { display: flex; }
 
         .sidebar-submenu a {
             text-decoration: none;
@@ -193,20 +210,16 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             padding: 5px 0;
         }
 
-        .sidebar-submenu a:hover {
-            color: var(--accent-orange);
-        }
-        /* ---------------------------------- */
+        .sidebar-submenu a:hover { color: var(--accent-orange); }
 
         /* --- 3. Main Content Area --- */
         .main-content {
             flex: 1;
-            padding: 20px 30px 20px 10px; /* Right padding larger */
-            overflow-y: auto; /* Scrollable content */
+            padding: 20px 30px 20px 10px;
+            overflow-y: auto;
             transition: 0.3s;
         }
 
-        /* Top Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -214,13 +227,8 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             margin-bottom: 30px;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
 
-        /* Hamburger Menu (Hidden on Desktop) */
         .menu-toggle {
             display: none;
             font-size: 24px;
@@ -228,9 +236,7 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             color: var(--text-main);
         }
 
-        .header h2 {
-            font-size: 22px;
-        }
+        .header h2 { font-size: 22px; }
 
         .search-bar {
             background: white;
@@ -257,24 +263,14 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
         }
 
         /* --- PROFILE STYLES --- */
-        .profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .profile { display: flex; align-items: center; gap: 10px; }
 
-        /* Ensure form stays small and inline */
-        #profileForm {
-            display: flex;
-            align-items: center;
-            margin: 0;
-        }
+        #profileForm { display: flex; align-items: center; margin: 0; }
 
-        /* Fixed size container for image to prevent "Big" look */
         .profile-upload-container {
             position: relative;
-            width: 40px !important;  /* Force small width */
-            height: 40px !important; /* Force small height */
+            width: 40px !important;
+            height: 40px !important;
             border-radius: 50%;
             overflow: hidden;
             cursor: pointer;
@@ -288,7 +284,6 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             display: block;
         }
 
-        /* Overlay on hover */
         .profile-overlay {
             position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
@@ -298,11 +293,8 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             color: white; font-size: 12px;
         }
         
-        .profile-upload-container:hover .profile-overlay {
-            display: flex;
-        }
+        .profile-upload-container:hover .profile-overlay { display: flex; }
 
-        /* --- HEADER DROPDOWN CSS --- */
         .profile-dropdown-wrapper {
             position: relative;
             display: flex;
@@ -315,7 +307,7 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             display: none;
             position: absolute;
             right: 0;
-            top: 35px; /* Spacing from name */
+            top: 35px;
             background-color: white;
             min-width: 140px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -338,11 +330,9 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             color: var(--accent-orange);
         }
 
-        .profile-dropdown-content.show {
-            display: block;
-        }
+        .profile-dropdown-content.show { display: block; }
 
-        /* Stats Cards Row */
+        /* Stats Cards */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -369,41 +359,23 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             justify-content: center;
             font-size: 24px;
             color: white;
-            flex-shrink: 0; /* Prevent icon shrinking */
+            flex-shrink: 0;
         }
 
         .icon-green { background-color: var(--accent-green); }
         .icon-blue { background-color: var(--accent-blue); }
         .icon-red { background-color: var(--accent-red); }
 
-        .card-info {
-            flex-grow: 1;
-        }
-
-        .card-info h3 {
-            font-size: 16px;
-            color: var(--text-main);
-        }
-        .card-info h2 {
-            font-size: 20px;
-            margin: 5px 0;
-        }
-        .card-info span {
-            font-size: 12px;
-            color: var(--accent-orange); /* Used orange for positive growth styling */
-            white-space: nowrap;
-        }
-        .date-label {
-            margin-left: auto;
-            font-size: 12px;
-            color: #aaa;
-            align-self: flex-start;
-        }
+        .card-info { flex-grow: 1; }
+        .card-info h3 { font-size: 16px; color: var(--text-main); }
+        .card-info h2 { font-size: 20px; margin: 5px 0; }
+        .card-info span { font-size: 12px; color: var(--accent-orange); white-space: nowrap; }
+        .date-label { margin-left: auto; font-size: 12px; color: #aaa; align-self: flex-start; }
 
         /* Charts Section */
         .charts-container {
             display: grid;
-            grid-template-columns: 2fr 1fr; /* Revenue is wider than Visitors */
+            grid-template-columns: 2fr 1fr;
             gap: 25px;
             padding-bottom: 20px;
         }
@@ -420,7 +392,7 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
-            flex-wrap: wrap; /* Allow wrapping on small screens */
+            flex-wrap: wrap;
             gap: 10px;
         }
 
@@ -438,7 +410,6 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             margin-right: 5px;
         }
 
-        /* Overlay for Mobile Sidebar */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -448,98 +419,32 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             z-index: 900;
         }
 
-        /* --- RESPONSIVE MEDIA QUERIES --- */
-
-        /* Tablet (max-width: 1024px) */
+        /* --- MEDIA QUERIES --- */
         @media (max-width: 1024px) {
-            .stats-row {
-                grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
-            }
-            .charts-container {
-                grid-template-columns: 1fr; /* Stack charts vertically */
-            }
-            .sidebar {
-                width: 220px; /* Slightly thinner sidebar */
-            }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .charts-container { grid-template-columns: 1fr; }
+            .sidebar { width: 220px; }
         }
 
-        /* Mobile (max-width: 768px) */
         @media (max-width: 768px) {
-            body {
-                display: block; /* Remove body flex to handle overlapping */
-                height: auto;
-                overflow-x: hidden;
-            }
-
-            /* Main Content Adjustments */
-            .main-content {
-                padding: 20px;
-                height: 100vh;
-            }
-
-            /* Sidebar hidden off-canvas */
+            body { display: block; height: auto; overflow-x: hidden; }
+            .main-content { padding: 20px; height: 100vh; }
             .sidebar {
-                position: fixed;
-                top: 0;
-                left: -280px; /* Hide to left */
-                height: 100vh;
-                margin: 0;
-                width: 260px;
-                border-radius: 0 20px 20px 0;
+                position: fixed; top: 0; left: -280px; height: 100vh;
+                margin: 0; width: 260px; border-radius: 0 20px 20px 0;
             }
-
-            /* Class to slide sidebar in */
-            .sidebar.active {
-                left: 0;
-            }
-
-            .sidebar-overlay.active {
-                display: block;
-            }
-
-            .menu-toggle {
-                display: block; /* Show hamburger */
-            }
-            
-            .sidebar-close-btn {
-                display: block; /* Show close X inside sidebar */
-            }
-
-            /* Header Adjustments */
-            .header {
-                flex-wrap: wrap;
-                gap: 15px;
-            }
-            
-            .header-left {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .search-bar {
-                width: 100%; /* Search takes full width on mobile */
-                order: 3; /* Move search to bottom of header flex */
-            }
-
-            .user-actions {
-                margin-left: auto;
-            }
-
-            /* Stats Cards Stack */
-            .stats-row {
-                grid-template-columns: 1fr; /* 1 card per row */
-            }
-
-            .card {
-                padding: 15px;
-            }
-            
-            /* Hide flag on tiny screens to save space */
-            .user-actions img[alt="UK"] {
-                display: none;
-            }
+            .sidebar.active { left: 0; }
+            .sidebar-overlay.active { display: block; }
+            .menu-toggle { display: block; }
+            .sidebar-close-btn { display: block; }
+            .header { flex-wrap: wrap; gap: 15px; }
+            .header-left { width: 100%; justify-content: space-between; }
+            .search-bar { width: 100%; order: 3; }
+            .user-actions { margin-left: auto; }
+            .stats-row { grid-template-columns: 1fr; }
+            .card { padding: 15px; }
+            .user-actions img[alt="UK"] { display: none; }
         }
-
     </style>
 </head>
 <body>
@@ -575,9 +480,20 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             <a href="welcome_letter.php">Welcome Letter</a>
         </div>
         
-        <a href="genealogy_tree.php" class="menu-item">
-            <i class="fa-solid fa-users menu-icon"></i> Members
-        </a>
+        <div style="position: relative;">
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-user menu-icon"></i> Members
+            </a>
+            
+            <div onclick="toggleSidebarMembers()" style="position: absolute; right: 0; top: 0; height: 100%; width: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: #888;"></i>
+            </div>
+        </div>
+
+        <div class="sidebar-submenu" id="sidebarMembersMenu">
+            <a href="genealogy_tree.php">Genealogy</a>
+        </div>
+
         <a href="sponsor_bonus.php" class="menu-item">
             <i class="fa-solid fa-money-bill-transfer menu-icon"></i> Insurance Details
         </a>
@@ -640,136 +556,102 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
 
         <div class="stats-row">
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-calendar-day"></i>
-
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-calendar-day"></i></div>
                 <div class="card-info">
                     <h3>Activation Date</h3>
-                    <h2>₹230,220</h2>
-                    <span><i class="fa-solid fa-arrow-trend-up"></i> +55% last month</span>
+                    <h2>23/05/2022</h2>
+                    <span><i class="fa-solid fa-check-circle"></i> Active</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
 
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-user-group"></i>
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-user-group"></i></div>
                 <div class="card-info">
                     <h3>Team Members</h3>
                     <h2>3,200</h2>
                     <span><i class="fa-solid fa-arrow-trend-up"></i> +12% last month</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
 
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-indian-rupee-sign"></i>
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-indian-rupee-sign"></i></div>
                 <div class="card-info">
                     <h3>Sponsored</h3>
                     <h2>₹2,300</h2>
                     <span><i class="fa-solid fa-arrow-trend-up"></i> +210% last month</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
 
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-chart-line"></i>
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-chart-line"></i></div>
                 <div class="card-info">
                     <h3>Self Investment</h3>
                     <h2>₹4,000</h2>
                     <span><i class="fa-solid fa-arrow-trend-up"></i> +12% last month</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
 
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-calendar-check"></i>
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-calendar-check"></i></div>
                 <div class="card-info">
                     <h3>Monthly PayOuts</h3>
                     <h2>3,200</h2>
                     <span><i class="fa-solid fa-arrow-trend-up"></i> +12% last month</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
 
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-hand-holding-dollar"></i>
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-hand-holding-dollar"></i></div>
                 <div class="card-info">
                     <h3>Sponsored Investment</h3>
                     <h2>3,200</h2>
                     <span><i class="fa-solid fa-arrow-trend-up"></i> +12% last month</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
 
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-chart-pie"></i>
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-chart-pie"></i></div>
                 <div class="card-info">
                     <h3>Business Ratio</h3>
                     <h2>3,200</h2>
                     <span><i class="fa-solid fa-arrow-trend-up"></i> +12% last month</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
 
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-handshake"></i>
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-handshake"></i></div>
                 <div class="card-info">
                     <h3>Team Business</h3>
                     <h2>3,200</h2>
                     <span><i class="fa-solid fa-arrow-trend-up"></i> +12% last month</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
 
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-money-bill-transfer"></i>
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-money-bill-transfer"></i></div>
                 <div class="card-info">
                     <h3>Total Bank PayOut</h3>
                     <h2>3,200</h2>
                     <span><i class="fa-solid fa-arrow-trend-up"></i> +12% last month</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
 
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-dollar-sign"></i>
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-dollar-sign"></i></div>
                 <div class="card-info">
                     <h3>Total Income</h3>
                     <h2>3,200</h2>
                     <span><i class="fa-solid fa-arrow-trend-up"></i> +12% last month</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
 
             <div class="card">
-                <div class="icon-box icon-red">
-                    <i class="fa-solid fa-coins"></i>
-                </div>
+                <div class="icon-box icon-red"><i class="fa-solid fa-coins"></i></div>
                 <div class="card-info">
                     <h3>Remaining Principle</h3>
                     <h2>3,200</h2>
                     <span><i class="fa-solid fa-arrow-trend-up"></i> +12% last month</span>
                 </div>
-                <div class="date-label">May 2022</div>
             </div>
         </div>
 
@@ -777,13 +659,13 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3>Revenue</h3>
+                    <h3>Business Growth Analysis</h3>
                     <div class="legend-dots">
-                        <span><span class="dot" style="background:#2DCD85"></span> Google ads</span>
-                        <span><span class="dot" style="background:#FF8C32"></span> Facebook ads</span>
+                        <span><span class="dot" style="background:#2DCD85"></span> Company Business (Volume)</span>
+                        <span><span class="dot" style="background:#FF8C32"></span> My Business (Income)</span>
                     </div>
                 </div>
-                <canvas id="revenueChart"></canvas>
+                <canvas id="growthChart"></canvas>
             </div>
 
             <div class="chart-card">
@@ -803,30 +685,29 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
     </div>
 
     <script>
-        // Toggle Sidebar Function used for Mobile
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
         }
 
-        // --- SIDEBAR PROFILE TOGGLE ---
         function toggleSidebarProfile() {
             const menu = document.getElementById('sidebarProfileMenu');
             menu.classList.toggle('show');
         }
 
-        // --- HEADER PROFILE DROPDOWN (Preserved) ---
+        function toggleSidebarMembers() {
+            const menu = document.getElementById('sidebarMembersMenu');
+            menu.classList.toggle('show');
+        }
+
         function toggleProfileMenu() {
             const dropdown = document.getElementById("profileDropdown");
             dropdown.classList.toggle("show");
         }
 
-        // Close the dropdowns if the user clicks outside
         window.onclick = function(event) {
-            // Close header dropdown
             if (!event.target.closest('.profile-dropdown-wrapper')) {
                 var dropdowns = document.getElementsByClassName("profile-dropdown-content");
                 for (var i = 0; i < dropdowns.length; i++) {
@@ -838,57 +719,100 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
             }
         }
 
-        // 1. Revenue Chart Configuration
-        const ctx1 = document.getElementById('revenueChart').getContext('2d');
+        // --- REAL DATA CHART CONFIGURATION (Matches Audio Requirements) ---
+        
+        // 1. Get Data from PHP
+        const chartLabels = <?php echo $jsLabels; ?>; 
+        const companyData = <?php echo $jsCompanyData; ?>; 
+        const selfData = <?php echo $jsSelfData; ?>;
+
+        const ctx1 = document.getElementById('growthChart').getContext('2d');
+        
+        // This configuration uses TWO Y-Axes.
+        // As per the audio: If company has 10 Lakhs and User has 1 Lakh, 
+        // a single axis makes the User line look flat.
+        // Two axes allow us to compare the GROWTH RATE (Inclination) side-by-side.
         new Chart(ctx1, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                labels: chartLabels,
                 datasets: [
                     {
-                        label: 'Google ads',
-                        data: [100, 280, 250, 400, 350, 450, 480],
-                        borderColor: '#2DCD85', // Green
-                        backgroundColor: 'transparent',
+                        label: 'Company Business',
+                        data: companyData,
+                        borderColor: '#2DCD85',
+                        backgroundColor: 'rgba(45, 205, 133, 0.1)',
                         borderWidth: 3,
-                        tension: 0.4, // Makes lines curved
+                        tension: 0.4,
                         pointRadius: 4,
                         pointBackgroundColor: '#fff',
-                        pointBorderColor: '#2DCD85'
+                        pointBorderColor: '#2DCD85',
+                        fill: true,
+                        yAxisID: 'y' // Left Axis
                     },
                     {
-                        label: 'Facebook ads',
-                        data: [200, 120, 150, 110, 550, 200, 300],
-                        borderColor: '#FF8C32', // Orange
-                        backgroundColor: 'transparent',
+                        label: 'My Business',
+                        data: selfData,
+                        borderColor: '#FF8C32',
+                        backgroundColor: 'rgba(255, 140, 50, 0.1)', 
                         borderWidth: 3,
-                        tension: 0.4, // Makes lines curved
+                        tension: 0.4,
                         pointRadius: 4,
                         pointBackgroundColor: '#fff',
-                        pointBorderColor: '#FF8C32'
+                        pointBorderColor: '#FF8C32',
+                        fill: true,
+                        yAxisID: 'y1' // Right Axis
                     }
                 ]
             },
             options: {
                 responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
                 plugins: {
-                    legend: { display: false } // We built a custom legend in HTML
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.y !== null) {
+                                    return label + '₹' + context.parsed.y.toLocaleString();
+                                }
+                                return label;
+                            }
+                        }
+                    }
                 },
                 scales: {
+                    x: { grid: { display: false } },
                     y: {
-                        beginAtZero: true,
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Company Volume (₹)' },
                         grid: { borderDash: [5, 5], color: '#eee' },
-                        ticks: { color: '#999' }
+                        ticks: {
+                            callback: function(value) { return '₹' + (value/100000).toFixed(1) + 'L'; } // Shows in Lakhs
+                        }
                     },
-                    x: {
-                        grid: { display: false },
-                        ticks: { display: false } // Hiding x labels to match image perfectly
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'My Income (₹)' },
+                        grid: { drawOnChartArea: false },
+                        ticks: {
+                            callback: function(value) { return '₹' + value; }
+                        }
                     }
                 }
             }
         });
 
-        // 2. Visitor Donut Chart Configuration
+        // 2. Visitor Donut Chart
         const ctx2 = document.getElementById('visitorChart').getContext('2d');
         new Chart(ctx2, {
             type: 'doughnut',
@@ -896,24 +820,17 @@ if (!empty($_SESSION['profile_image']) && file_exists('uploads/profile/' . $_SES
                 labels: ['Direct', 'Organic', 'Social', 'Referral'],
                 datasets: [{
                     data: [38, 22, 15, 25],
-                    backgroundColor: [
-                        '#FF8C32', // Orange
-                        '#2DCD85', // Green
-                        '#5AB6D8', // Blue
-                        '#F7525F'  // Red
-                    ],
+                    backgroundColor: ['#FF8C32', '#2DCD85', '#5AB6D8', '#F7525F'],
                     borderWidth: 5,
-                    borderColor: '#ffffff', // White borders between slices
+                    borderColor: '#ffffff',
                     hoverOffset: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '75%', // Makes the ring thinner
-                plugins: {
-                    legend: { display: false }
-                }
+                cutout: '75%',
+                plugins: { legend: { display: false } }
             }
         });
     </script>

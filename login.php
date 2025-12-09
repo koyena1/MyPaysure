@@ -3,7 +3,7 @@ session_start();
 
 // 1. DATABASE CONNECTION & FUNCTIONS
 require_once 'includes/db.php';
-require_once 'includes/functions.php'; // Contains updateUplineCounts()
+require_once 'includes/functions.php';
 
 // Ensure $pdo variable is available
 if (!isset($pdo) && isset($db)) { $pdo = $db; }
@@ -12,40 +12,37 @@ $login_error = "";
 $register_message = "";
 $register_msg_type = "";
 
-// --- HELPER FUNCTION: Find Placement (Using network_structure) ---
-// This finds the first available empty spot under the Sponsor using BFS
-function findPlacement($pdo, $rootSponsorId) {
-    // Queue starts with the Sponsor's Integer ID
-    $queue = [$rootSponsorId];
+// --- HELPER FUNCTION: Find Extreme Leg Placement ---
+function findExtremeLegPlacement($pdo, $sponsorId, $chosenLeg) {
+    $currentId = $sponsorId;
+    while (true) {
+        $stmt = $pdo->prepare("SELECT distributor_id FROM network_structure WHERE parent_id = ? AND leg_type = ?");
+        $stmt->execute([$currentId, $chosenLeg]);
+        $existingNode = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    while (count($queue) > 0) {
-        $currentId = array_shift($queue);
-
-        // 1. Check Left Leg in network_structure
-        $stmt = $pdo->prepare("SELECT distributor_id FROM network_structure WHERE parent_id = ? AND leg_type = 'Left'");
-        $stmt->execute([$currentId]);
-        $leftNode = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$leftNode) {
-            // Found empty Left spot! Return Parent ID and Position
-            return ['parent_id' => $currentId, 'position' => 'Left'];
+        if (!$existingNode) {
+            return ['parent_id' => $currentId, 'position' => $chosenLeg];
         }
-
-        // 2. Check Right Leg in network_structure
-        $stmt = $pdo->prepare("SELECT distributor_id FROM network_structure WHERE parent_id = ? AND leg_type = 'Right'");
-        $stmt->execute([$currentId]);
-        $rightNode = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$rightNode) {
-            // Found empty Right spot! Return Parent ID and Position
-            return ['parent_id' => $currentId, 'position' => 'Right'];
-        }
-
-        // 3. If both full, add children to queue to search the next level
-        $queue[] = $leftNode['distributor_id'];
-        $queue[] = $rightNode['distributor_id'];
+        $currentId = $existingNode['distributor_id'];
     }
-    return null; 
+}
+
+// --- HELPER FUNCTION: Generate Smart Sequential ID ---
+// Format: [2 Random Letters] [ID + 10000] [1 Random Letter]
+// Example: User ID 5 -> AB10005X
+function generateSmartID($userId) {
+    // 1. Generate 2 Random Uppercase Letters
+    $prefix = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 2);
+    
+    // 2. Create Sequential Number (ID + Offset to look professional)
+    // We add 10000 so the first user looks like ID #10001
+    $offset = 10000;
+    $sequence = $userId + $offset;
+    
+    // 3. Generate 1 Random Suffix Letter
+    $suffix = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 1);
+    
+    return $prefix . $sequence . $suffix;
 }
 
 // 2. LOGIN LOGIC
@@ -55,8 +52,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 
     if (!empty($username_in) && !empty($password_in)) {
         try {
-            $stmt = $pdo->prepare("SELECT id, username, password_hash, full_name, email, role, is_active FROM users WHERE username = ? OR email = ?");
-            $stmt->execute([$username_in, $username_in]);
+            // Allow login via Username, Email, OR Member Code
+            $stmt = $pdo->prepare("SELECT id, username, member_code, password_hash, full_name, email, role, is_active FROM users WHERE username = ? OR email = ? OR member_code = ?");
+            $stmt->execute([$username_in, $username_in, $username_in]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user) {
@@ -67,6 +65,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                     $_SESSION['loggedin'] = true;
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
+                    // Store the Member Code in session
+                    $_SESSION['member_code'] = !empty($user['member_code']) ? $user['member_code'] : $user['username'];
                     $_SESSION['full_name'] = $user['full_name'];
                     $_SESSION['role'] = $user['role'];
 
@@ -90,23 +90,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     }
 }
 
-// 3. REGISTRATION LOGIC (Optimized - No 'registrations' table)
+// 3. REGISTRATION LOGIC
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] === 'signup') {
     
-    // Inputs
-    $sponsor_input = trim($_POST['sponsor_id']); // e.g. SPON_9 or admin
-    $full_name = trim($_POST['fullname']);
+    $sponsor_input  = trim($_POST['sponsor_id']); 
+    $full_name      = trim($_POST['fullname']);
     $username_input = trim($_POST['username']); 
-    $mobile = trim($_POST['mobile']);
-    $email = trim($_POST['email']);
-    $raw_password = $_POST['password'];
+    $mobile         = trim($_POST['mobile']);
+    $email          = trim($_POST['email']);
+    $raw_password   = $_POST['password'];
+    $selected_leg   = $_POST['position'] ?? 'Left';
 
     if(empty($sponsor_input) || empty($username_input)) {
         $register_message = "Sponsor ID and Username are required.";
         $register_msg_type = "error";
     } else {
         try {
-            // A. Check Duplicates in USERS table
+            // A. Check Duplicates
             $checkStmt = $pdo->prepare("SELECT id FROM users WHERE email = ? OR username = ?");
             $checkStmt->execute([$email, $username_input]);
             
@@ -114,32 +114,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                 $register_message = "Email or Username already exists!";
                 $register_msg_type = "error";
             } else {
-                // B. Validate Sponsor
-                // Check if input is 'SPON_ID' OR 'username'
-                $sponStmt = $pdo->prepare("SELECT id, full_name, username FROM users WHERE my_spon_id = ? OR username = ?");
-                $sponStmt->execute([$sponsor_input, $sponsor_input]);
+                // B. Validate Sponsor (Check by username, member_code, or my_spon_id)
+                $sponStmt = $pdo->prepare("SELECT id, full_name, username FROM users WHERE my_spon_id = ? OR username = ? OR member_code = ?");
+                $sponStmt->execute([$sponsor_input, $sponsor_input, $sponsor_input]);
                 $sponsorData = $sponStmt->fetch(PDO::FETCH_ASSOC);
 
                 if (!$sponsorData) {
                     $register_message = "Invalid Sponsor ID! Please check again.";
                     $register_msg_type = "error";
                 } else {
-                    $sponsor_db_id = $sponsorData['id']; // Integer ID (e.g., 9)
+                    $sponsor_db_id = $sponsorData['id'];
 
-                    // C. Find Placement (Returns Parent ID and Leg)
-                    $placement = findPlacement($pdo, $sponsor_db_id);
-
-                    if (!$placement) {
-                        // Special Case: If this is the FIRST user under a root admin who isn't in tree yet
-                        // We place them directly under sponsor
-                        $parent_db_id = $sponsor_db_id;
-                        $position = 'Left';
-                    } else {
-                        $parent_db_id = $placement['parent_id'];
-                        $position = $placement['position'];
+                    if ($selected_leg !== 'Left' && $selected_leg !== 'Right') {
+                        $selected_leg = 'Left';
                     }
 
-                    // Get Parent Name for Display/Records
+                    // C. Find Placement
+                    $placement = findExtremeLegPlacement($pdo, $sponsor_db_id, $selected_leg);
+                    $parent_db_id = $placement['parent_id'];
+                    $position     = $placement['position'];
+
                     $pStmt = $pdo->prepare("SELECT full_name FROM users WHERE id = ?");
                     $pStmt->execute([$parent_db_id]);
                     $parentName = $pStmt->fetchColumn();
@@ -148,53 +142,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                     $pdo->beginTransaction();
 
                     try {
-                        // 1. Insert into USERS
+                        // 1. Insert into USERS (Initially with NULL member_code)
                         $password_hash = password_hash($raw_password, PASSWORD_DEFAULT);
-                        $sqlUser = "INSERT INTO users (username, password_hash, email, full_name, mobile, role, is_active, created_at, sponsor_id) VALUES (?, ?, ?, ?, ?, 'user', 1, NOW(), ?)";
+                        // Note: We insert NULL for member_code first, then update it after getting ID
+                        $sqlUser = "INSERT INTO users (username, member_code, password_hash, email, full_name, mobile, role, is_active, created_at, sponsor_id) VALUES (?, NULL, ?, ?, ?, ?, 'user', 1, NOW(), ?)";
                         $stmtUser = $pdo->prepare($sqlUser);
                         $stmtUser->execute([$username_input, $password_hash, $email, $full_name, $mobile, $sponsorData['username']]);
                         $new_user_id = $pdo->lastInsertId();
 
-                        // 2. Update generated IDs
-                        $new_spon_id_str = "SPON_" . $new_user_id;
-                        $updateUser = $pdo->prepare("UPDATE users SET my_spon_id = ? WHERE id = ?");
-                        $updateUser->execute([$new_spon_id_str, $new_user_id]);
+                        // 2. GENERATE SMART ID & UPDATE USER
+                        // Using the new logic: [2 Random Letters] [ID + 10000] [1 Random Letter]
+                        $new_smart_id = generateSmartID($new_user_id);
 
-                        // 3. Insert into NETWORK_STRUCTURE (Tree Logic)
+                        // Update both member_code AND my_spon_id to be this new Smart ID
+                        // This allows users to share this code as their Sponsor ID
+                        $updateUser = $pdo->prepare("UPDATE users SET member_code = ?, my_spon_id = ? WHERE id = ?");
+                        $updateUser->execute([$new_smart_id, $new_smart_id, $new_user_id]);
+
+                        // 3. Insert into NETWORK_STRUCTURE
                         $sqlNet = "INSERT INTO network_structure (distributor_id, parent_id, sponsor_id, leg_type, created_at) VALUES (?, ?, ?, ?, NOW())";
                         $stmtNet = $pdo->prepare($sqlNet);
-                        $stmtNet->execute([
-                            $new_user_id,
-                            $parent_db_id,
-                            $sponsor_db_id,
-                            $position
-                        ]);
+                        $stmtNet->execute([$new_user_id, $parent_db_id, $sponsor_db_id, $position]);
 
                         // 4. Update Upline Counts
                         if (function_exists('updateUplineCounts')) {
                             updateUplineCounts($pdo, $parent_db_id, $new_user_id, $position);
                         }
 
-                        // 5. Insert into MY_DIRECTS (Referral List)
+                        // 5. Insert into MY_DIRECTS
                         $sqlDirect = "INSERT INTO my_directs (member_id, name, mobile, sponsor_id, sponsor_name, parent_id, parent_name, active_status, date_of_joining) VALUES (?, ?, ?, ?, ?, ?, ?, 'Active', NOW())";
                         $stmtDirect = $pdo->prepare($sqlDirect);
-                        $stmtDirect->execute([
-                            $new_user_id,
-                            $full_name,
-                            $mobile,
-                            $sponsor_db_id,
-                            $sponsorData['full_name'],
-                            $parent_db_id,
-                            $parentName
-                        ]);
+                        $stmtDirect->execute([$new_user_id, $full_name, $mobile, $sponsor_db_id, $sponsorData['full_name'], $parent_db_id, $parentName]);
 
-                        // Commit
                         $pdo->commit();
 
-                        // Auto Login
                         $_SESSION['loggedin'] = true;
                         $_SESSION['user_id'] = $new_user_id;
                         $_SESSION['username'] = $username_input;
+                        $_SESSION['member_code'] = $new_smart_id; 
                         $_SESSION['full_name'] = $full_name;
                         $_SESSION['role'] = 'user';
 
@@ -202,9 +187,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                         exit;
 
                     } catch (Exception $e) {
-                        if ($pdo->inTransaction()) {
-                            $pdo->rollBack();
-                        }
+                        if ($pdo->inTransaction()) { $pdo->rollBack(); }
                         $register_message = "Registration Error: " . $e->getMessage();
                         $register_msg_type = "error";
                     }
@@ -230,7 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: center; flex-direction: column; height: 100vh; overflow: hidden; }
     .bg-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; object-fit: cover; filter: brightness(0.7); }
-    .container { background-color: var(--white); border-radius: 20px; box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22); position: relative; overflow: hidden; width: 850px; max-width: 100%; min-height: 600px; }
+    .container { background-color: var(--white); border-radius: 20px; box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22); position: relative; overflow: hidden; width: 850px; max-width: 100%; min-height: 650px; }
     .form-container { position: absolute; top: 0; height: 100%; transition: all 0.6s ease-in-out; }
     form { background-color: var(--white); display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 0 50px; height: 100%; text-align: center; }
     h1 { font-weight: 700; margin: 0; margin-bottom: 10px; font-size: 24px;}
@@ -238,7 +221,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     .social-container { margin: 10px 0; }
     .social-container a { border: 1px solid #ddd; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; height: 35px; width: 35px; color: #333; text-decoration: none; transition: 0.3s; }
     .social-container a:hover { background: #eee; }
-    input { background-color: #eee; border: none; padding: 10px 15px; margin: 5px 0; width: 100%; border-radius: 8px; outline: none; font-size: 13px; }
+    input, select { background-color: #eee; border: none; padding: 10px 15px; margin: 5px 0; width: 100%; border-radius: 8px; outline: none; font-size: 13px; }
+    select { cursor: pointer; color: #333; }
     .forgot-pass { color: #333; font-size: 12px; text-decoration: none; margin: 10px 0; }
     button { border-radius: 20px; border: 1px solid var(--purple-1); background-color: var(--purple-1); color: #ffffff; font-size: 12px; font-weight: bold; padding: 12px 45px; letter-spacing: 1px; text-transform: uppercase; transition: transform 80ms ease-in; cursor: pointer; margin-top: 10px; }
     button:active { transform: scale(0.95); }
@@ -258,7 +242,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     .container.right-panel-active .overlay-left { transform: translateX(0); }
     .overlay-right { right: 0; transform: translateX(0); }
     .container.right-panel-active .overlay-right { transform: translateX(20%); }
-    @media (max-width: 768px) { .container { width: 90%; min-height: 600px; } form { padding: 0 20px; } }
+    @media (max-width: 768px) { .container { width: 90%; min-height: 650px; } form { padding: 0 20px; } }
 </style>
 </head>
 <body>
@@ -277,7 +261,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                     <?php echo $register_message; ?>
                 </div>
             <?php endif; ?>
-            <input type="text" name="sponsor_id" placeholder="Sponsor ID (e.g. SPON_9)" required />
+            <input type="text" name="sponsor_id" placeholder="Sponsor ID (e.g. AZ10025P)" required />
+            
+            <select name="position" required>
+                <option value="" disabled selected>Select Position</option>
+                <option value="Left">Left Leg</option>
+                <option value="Right">Right Leg</option>
+            </select>
+
             <input type="text" name="fullname" placeholder="Full Name" required />
             <input type="text" name="username" placeholder="Username (Unique)" required />
             <input type="text" name="mobile" placeholder="Mobile Number" required />
@@ -301,7 +292,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                     <?php echo $login_error; ?>
                 </div>
             <?php endif; ?>
-            <input type="text" name="username" placeholder="Email or Username" required />
+            <input type="text" name="username" placeholder="Email / Username / Member ID" required />
             <input type="password" name="password" placeholder="Password" required />
             <a href="#" class="forgot-pass">Forgot your password?</a>
             <button type="submit">Sign In</button>

@@ -1,13 +1,9 @@
 <?php
-/*****************************
- * DATABASE CONNECTION
- *****************************/
-$servername = "localhost";  // Database host
-$username   = "root";       // Database username
-$password   = "";           // Database password
-$dbname     = "paysure_insurance"; 
+session_start();
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+require_once '../includes/db.php'; 
+
+// $conn = new mysqli($servername, $username, $password, $dbname);
 
 // ✅ Handle connection errors cleanly
 if ($conn->connect_error) {
